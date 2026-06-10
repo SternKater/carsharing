@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package invoice;
+
+// Path to generated code
+option go_package = "github.com/SternKater/carsharing/pkg/billing/invoice/pay;invoice";
+
+message PayRequest {
+    int64 invoice_id        = 1;
+    int64 amount_in_cents   = 2;
+    string idempotency_key  = 3;
+}
+
+message PayResponse {
+  bool success          = 1;
+  int64 amount_in_cents = 2;
+  string message        = 3;
+}
+
+service PayService {
+    rpc Pay (PayRequest) returns (PayResponse);
+}

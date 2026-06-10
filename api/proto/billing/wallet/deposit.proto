@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package wallet;
+
+// Path to generated code
+option go_package = "github.com/SternKater/carsharing/pkg/billing/wallet/deposit;wallet";
+
+message DepositRequest {
+    int64 invoice_id        = 1;
+    int64 amount_in_cents   = 2;
+    string idempotency_key  = 3;
+}
+
+message DepositResponse {
+  bool success          = 1;
+  int64 amount_in_cents = 2;
+  string message        = 3;
+}
+
+service DepositService {
+    rpc Deposit (DepositRequest) returns (DepositResponse);
+}

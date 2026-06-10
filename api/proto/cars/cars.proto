@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package cars;
+
+// Path to generated code
+option go_package = "github.com/SternKater/carsharing/pkg/cars;cars";
+
+message CarsRequest {
+}
+
+message CarsItem {
+  int64 id      = 1;
+  string name   = 2;
+  string number = 3;
+  int64 ppm     = 4;
+  string status = 5;
+}
+
+message CarsResponse {
+  bool success          = 1;
+  string message        = 2;
+  repeated CarsItem cars= 3;
+}
+
+service CarsService {
+  rpc Cars (CarsRequest) returns (CarsResponse);
+}

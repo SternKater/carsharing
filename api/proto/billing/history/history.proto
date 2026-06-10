@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package history;
+
+// Path to generated code
+option go_package = "github.com/SternKater/carsharing/pkg/billing/history;history";
+
+message HistoryRequest {
+    int64 start_from    = 1;
+    int64 end_to        = 2;
+    int32 page          = 3;
+}
+
+message HistoryItem {
+    int64 timestamp          = 1;
+    int64 amount_in_cents    = 2;
+    string details           = 3;
+}
+message HistoryResponse {
+    bool success                = 1;
+    string message              = 2;
+    repeated HistoryItem items  = 3;
+    int32 total_amount_in_cents = 4;
+    int32 current_page          = 5;
+}
+
+service HistoryService {
+    rpc History (HistoryRequest) returns (HistoryResponse);
+}
