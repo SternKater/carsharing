@@ -5,6 +5,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
+
 
 	"github.com/SternKater/carsharing/internal/delivery/grpc/handler"
 	"github.com/SternKater/carsharing/internal/delivery/grpc/interceptors"
@@ -19,14 +22,19 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-// gRPC Server
-	gRPCConnStr := os.Getenv("GRPC_CONN_STR")
-	if gRPCConnStr == "" {
-		gRPCConnStr = "localhost:6380"
+// Reddis
+	redisConnStr := os.Getenv("REDIS_CONN_STR")
+	if redisConnStr == "" {
+		redisConnStr = "localhost:6380"
 	}
-	rdb := redis.NewClient(&redis.Options{Addr: gRPCConnStr})
+	rdb := redis.NewClient(&redis.Options{Addr: redisConnStr})
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		log.Fatalf("[SERVER]: Failed to ping Redis: %v", err)
+	}
+	defer rdb.Close()
 // Rate Limit check
 	rateLimiterInterceptor, err := interceptors.NewUnaryRateLimiterInterceptor(rdb, 10, 60, "scripts/lua/rate_limiter.lua")	
 	if err != nil {
@@ -69,8 +77,8 @@ func main() {
 	defer postgresPool.Close()
 
 // repository
-	authRepo := postgres.NewAuthRepository(postgresPool)
 	txManager := postgres.NewTxManager(postgresPool)
+	authRepo := postgres.NewAuthRepository(postgresPool)
 // service
 	authService := service.NewAuthService(authRepo, tkMgr, txManager)
 //handler	
@@ -86,5 +94,4 @@ func main() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("[SERVER]: Failed to serve: %v", err)
 	}
-
 }

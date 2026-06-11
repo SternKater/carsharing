@@ -17,5 +17,5 @@ var (
 
 	ErrInternal           	= errors.New("internal server error")
 
-	ErrNoUserID				= -1
+	ErrNoUserID	int64		= -1
 )
