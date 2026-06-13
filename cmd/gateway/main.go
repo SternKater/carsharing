@@ -15,6 +15,7 @@ import (
 	"github.com/SternKater/carsharing/internal/service"
 	"github.com/SternKater/carsharing/internal/tokens"
 	"github.com/SternKater/carsharing/pkg/auth"
+	"github.com/SternKater/carsharing/pkg/cars"
 	"github.com/redis/go-redis/v9"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -81,9 +82,15 @@ func main() {
 	authRepo := postgres.NewAuthRepository(postgresPool)
 // service
 	authService := service.NewAuthService(authRepo, tkMgr, txManager)
-//handler	
+// handler	
 	authHandler := handler.NewAuthHandler(authService)
 	auth.RegisterAuthServiceServer(grpcServer, authHandler)
+
+// same as prev	
+	carsRepo := postgres.NewCarsRepository(postgresPool)
+	carsService := service.NewCarsService(carsRepo)
+	carsHandler := handler.NewCarsHandler(carsService)
+	cars.RegisterCarsServiceServer(grpcServer, carsHandler)
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
