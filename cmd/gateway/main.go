@@ -16,6 +16,7 @@ import (
 	"github.com/SternKater/carsharing/internal/tokens"
 	"github.com/SternKater/carsharing/pkg/auth"
 	"github.com/SternKater/carsharing/pkg/cars"
+	"github.com/SternKater/carsharing/pkg/billing/wallet"
 	"github.com/redis/go-redis/v9"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -91,6 +92,12 @@ func main() {
 	carsService := service.NewCarsService(carsRepo)
 	carsHandler := handler.NewCarsHandler(carsService)
 	cars.RegisterCarsServiceServer(grpcServer, carsHandler)
+
+// balance
+	balanceRepo := postgres.NewBalanceRepository(postgresPool)
+	balanceService := service.NewBalanceService(balanceRepo)
+	balanceHandler := handler.NewBalanceHandler(balanceService)
+	wallet.RegisterBalanceServiceServer(grpcServer, balanceHandler)	
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {

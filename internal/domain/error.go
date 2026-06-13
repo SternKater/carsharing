@@ -20,4 +20,7 @@ var (
 
 // Car	
 	ErrCarNotFound 			= errors.New("car not found")
+
+// Balance
+	ErrBalanceNotFound 		= errors.New("wallet balance not found for this user")
 )
