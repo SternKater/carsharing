@@ -3,9 +3,10 @@ package postgres
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/SternKater/carsharing/internal/domain"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type contextKey	string
@@ -46,13 +47,13 @@ func getExecutor(ctx context.Context, defaultPool *pgxpool.Pool) TxQuerier {
 func (tm *TxManager) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
 	tx, err := tm.pool.Begin(ctx)
 	if err != nil {
-		panic(err)
+		return domain.ErrInternal
 	}
 
 	defer func() {
 		if p := recover(); p != nil {
 			_ = tx.Rollback(ctx)
-			panic(p) 
+			return
 		}
 	}()
 
@@ -65,7 +66,7 @@ func (tm *TxManager) WithinTransaction(ctx context.Context, fn func(ctx context.
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		panic(err)
+		return domain.ErrInternal
 	}
 
 	return nil

@@ -21,14 +21,17 @@ func NewTokenManager(secret []byte) *TokenManager {
 	return &TokenManager{jwtSecret: secret}
 }
 
-func (t *TokenManager) JWTByUserID(id int64) string {
+func (t *TokenManager) JWTByUserID(id int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{"user_id": id,
 			"exp": time.Now().Add(time.Minute * 15).Unix()},
 	)
-	jwtToken, _ := token.SignedString(t.jwtSecret)
+	jwtToken, err := token.SignedString(t.jwtSecret)
+	if err != nil {
+		return "", domain.ErrInternal
+	}
 
-	return jwtToken
+	return jwtToken, err
 }
 
 func (t *TokenManager) ExtractAuthToken(ctx context.Context) (string, error) {

@@ -39,7 +39,8 @@ func (u *UnaryTokenInterceptor)UnaryServerInterceptor(ctx context.Context, req a
     
 // no token needed
     if info.FullMethod == "/auth.AuthService/SignIn" || 
-    info.FullMethod == "/auth.AuthService/SignUp" {
+    info.FullMethod == "/auth.AuthService/SignUp" || 
+    info.FullMethod == "/auth.AuthService/AuthRefresh" {
         resp, err := handler(ctx, req)
         log.Printf("[INTERCEPTOR][JWTToken]: Sending response from method: %s", info.FullMethod)
         return resp, err
